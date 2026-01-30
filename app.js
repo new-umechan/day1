@@ -299,6 +299,10 @@ class GameApp extends HTMLElement {
     }
 
     connectedCallback() {
+        this.shadowRoot.innerHTML = `
+            <link rel="stylesheet" href="./styles.css" />
+            <div id="game-root"></div>
+        `;
         this.render();
         this.shadowRoot.addEventListener("click", (e) => this.onClick(e));
         this.shadowRoot.addEventListener("input", (e) => this.onInput(e));
@@ -448,8 +452,8 @@ class GameApp extends HTMLElement {
         const nameKey = target.dataset.name;
         if (!nameKey) return;
         const player = Number(nameKey);
-        const names = { ...this.state.names, [player]: target.value || (player === 1 ? "プレイヤー1" : "プレイヤー2") };
-        this.setState({ names });
+
+        this.state.names[player] = target.value || (player === 1 ? "プレイヤー1" : "プレイヤー2");
     }
 
     clearSelection() {
@@ -654,9 +658,11 @@ class GameApp extends HTMLElement {
     }
 
     render() {
+        const root = this.shadowRoot.getElementById("game-root");
+        if (!root) return;
+
         const { screen } = this.state;
         const html = `
-            <link rel="stylesheet" href="./styles.css" />
             <div class="app">
                 ${screen === "title" ? this.renderTitle() : ""}
                 ${screen === "names" ? this.renderNames() : ""}
@@ -666,10 +672,10 @@ class GameApp extends HTMLElement {
             ${this._promotionModal ? this.renderPromotionModal() : ""}
             ${this._designEditModal ? this.renderDesignEditModal() : ""}
         `;
-        this.shadowRoot.innerHTML = html;
+        root.innerHTML = html;
 
         if (this._promotionModal) {
-            this.shadowRoot.querySelectorAll("[data-promo-toggle]").forEach((el) => {
+            root.querySelectorAll("[data-promo-toggle]").forEach((el) => {
                 el.addEventListener("click", () => {
                     const key = el.dataset.promoToggle;
                     this.togglePromoExtra(key);
@@ -706,7 +712,6 @@ class GameApp extends HTMLElement {
 
                 <button class="btn-confirm" data-action="to-design">確定</button>
                 
-                <button class="btn secondary" data-action="to-title" style="margin-top: -20px;">戻る</button>
             </div>
         `;
     }
