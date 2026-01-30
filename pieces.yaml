@@ -1,0 +1,52 @@
+pieces:
+  - id: "KING"
+    label: "王"
+    count: 1
+    locked: true
+    abilities:
+      step: { n: true, s: true, e: true, w: true, ne: true, nw: true, se: true, sw: true }
+  - id: "FUDO"
+    label: "不動"
+    count: 2
+    abilities:
+      step: { n: false, s: false, e: false, w: false, ne: false, nw: false, se: false, sw: false }
+  - id: "CHUNIN"
+    label: "仲人"
+    count: 2
+    abilities:
+      step: { n: true, s: true, e: false, w: false, ne: false, nw: false, se: false, sw: false }
+  - id: "ROOK"
+    label: "飛"
+    count: 1
+    abilities:
+      slide: { orthogonal: true }
+  - id: "BISHOP"
+    label: "角"
+    count: 1
+    abilities:
+      slide: { diagonal: true }
+  - id: "GOLD"
+    label: "金"
+    count: 2
+    abilities:
+      step: { n: true, s: true, e: true, w: true, ne: true, nw: true }
+  - id: "SILVER"
+    label: "銀"
+    count: 2
+    abilities:
+      step: { n: true, ne: true, nw: true, se: true, sw: true }
+  - id: "KNIGHT"
+    label: "桂"
+    count: 2
+    abilities:
+      knight: true
+  - id: "LANCE"
+    label: "香"
+    count: 2
+    abilities:
+      slide: { forward: true }
+  - id: "PAWN"
+    label: "歩"
+    count: 9
+    abilities:
+      step: { n: true }

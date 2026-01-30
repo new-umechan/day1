@@ -35,10 +35,21 @@ input {
     font: inherit;
 }
 
+:host {
+    display: block;
+    height: 100%;
+}
+
+#game-root {
+    height: 100%;
+}
+
 .app {
     min-height: 100%;
-    display: grid;
-    place-items: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     padding: 28px 16px;
 }
 
@@ -420,6 +431,84 @@ input {
     justify-content: flex-end;
     gap: 10px;
     margin-top: 12px;
+}
+
+/* New Design Screen Styles */
+.design-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.design-header h2 {
+    font-size: 32px;
+    color: #241818;
+    margin-bottom: 8px;
+}
+
+.design-header p {
+    font-size: 24px;
+    color: #000;
+}
+
+.design-container {
+    background: var(--accent);
+    padding: 20px;
+    border-radius: 4px;
+    width: min(840px, 95vw);
+    min-height: 449px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+}
+
+.design-points {
+    align-self: flex-end;
+    color: #fff;
+    font-size: 20px;
+    padding-right: 30px;
+}
+
+.piece-grid {
+    background: white;
+    padding: 10px;
+    border-radius: 4px;
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    grid-gap: 8px;
+    width: calc(100% - 40px);
+}
+
+.piece-card {
+    background: var(--accent);
+    color: var(--bg);
+    width: 71px;
+    height: 106px;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.1s;
+    user-select: none;
+}
+
+.piece-card:hover {
+    transform: scale(1.05);
+}
+
+.piece-card .label {
+    font-size: 36px;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-weight: 500;
+    line-height: 1.1;
+    text-align: center;
+}
+
+.piece-card.empty {
+    visibility: hidden;
 }
 
 /* Title Screen Specific */
