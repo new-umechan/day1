@@ -38,11 +38,15 @@ export function parsePiecesYaml(text) {
 
         if (trimmed.startsWith('- id:')) {
             const id = trimmed.split(':')[1].trim().replace(/['"]/g, '');
-            current = { id, label: id, count: 0, abilities: createEmptyAbilities() };
+            current = { id, label: id, fullName: id, description: '', count: 0, abilities: createEmptyAbilities() };
             pieces.push(current);
         } else if (current) {
             if (trimmed.startsWith('label:')) {
                 current.label = trimmed.split(':')[1].trim().replace(/['"]/g, '');
+            } else if (trimmed.startsWith('fullName:')) {
+                current.fullName = trimmed.split(':')[1].trim().replace(/['"]/g, '');
+            } else if (trimmed.startsWith('description:')) {
+                current.description = trimmed.split(':')[1].trim().replace(/['"]/g, '');
             } else if (trimmed.startsWith('count:')) {
                 current.count = parseInt(trimmed.split(':')[1].trim()) || 0;
             } else if (trimmed.startsWith('step:')) {
@@ -106,7 +110,40 @@ export function abilityCost(abilities) {
     return cost;
 }
 
-export function pieceLabel(piece) {
+export function abilitiesEqual(a, b) {
+    if (!a || !b) return false;
+    for (const k of Object.keys(a.step)) {
+        if (a.step[k] !== b.step[k]) return false;
+    }
+    if (a.knight !== b.knight) return false;
+    for (const k of Object.keys(a.slide)) {
+        if (a.slide[k] !== b.slide[k]) return false;
+    }
+    return true;
+}
+
+export function getPieceLabelByAbilities(abilities) {
+    const preset = PIECES_DATA.find(p => abilitiesEqual(p.abilities, abilities));
+    return preset ? preset.label : "新しい駒";
+}
+
+export function getPieceMetadata(kind) {
+    const piece = PIECES_DATA.find(p => p.id === kind);
+    if (piece) {
+        return {
+            fullName: piece.fullName || piece.label,
+            description: piece.description || '',
+        };
+    }
+    return { fullName: kind, description: '' };
+}
+
+export function pieceLabel(piece, config) {
+    const abilities = config ? config[piece.instanceId] : null;
+    if (abilities) {
+        const label = getPieceLabelByAbilities(abilities);
+        return piece.promoted ? `成${label}` : label;
+    }
     const data = PIECES_DATA.find(p => p.id === piece.kind);
     const base = data ? data.label : piece.kind;
     if (!piece.promoted) return base;

@@ -76,3 +76,6 @@ WebComponentsを使用。
 - 二歩などの細かい禁則は未実装。
 - 成り：成れる駒は、成り時に追加能力を最大 `+2` まで購入できます（UI簡略のためスライドは購入対象外）。
 
+### テスト
+~/programing/100days/day001 > python3 -m http.server 8000
+http://localhost:8000を開く

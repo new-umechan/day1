@@ -1,52 +1,72 @@
 pieces:
   - id: "KING"
     label: "王"
+    fullName: "王将"
+    description: "王様。取られたら負け。"
     count: 1
     locked: true
     abilities:
       step: { n: true, s: true, e: true, w: true, ne: true, nw: true, se: true, sw: true }
   - id: "FUDO"
     label: "不動"
+    fullName: "不動"
+    description: "動かざること山の如し。"
     count: 2
     abilities:
       step: { n: false, s: false, e: false, w: false, ne: false, nw: false, se: false, sw: false }
   - id: "CHUNIN"
     label: "仲人"
+    fullName: "仲人"
+    description: "少しだけ前後に動ける仲介役。"
     count: 2
     abilities:
       step: { n: true, s: true, e: false, w: false, ne: false, nw: false, se: false, sw: false }
   - id: "ROOK"
     label: "飛"
+    fullName: "飛車"
+    description: "前後左右にどこまでも。"
     count: 1
     abilities:
       slide: { orthogonal: true }
   - id: "BISHOP"
     label: "角"
+    fullName: "角行"
+    description: "斜め四方にどこまでも。"
     count: 1
     abilities:
       slide: { diagonal: true }
   - id: "GOLD"
     label: "金"
+    fullName: "金将"
+    description: "前後左右と斜め前に動ける。"
     count: 2
     abilities:
       step: { n: true, s: true, e: true, w: true, ne: true, nw: true }
   - id: "SILVER"
     label: "銀"
+    fullName: "銀将"
+    description: "前と斜め四方に動ける。"
     count: 2
     abilities:
       step: { n: true, ne: true, nw: true, se: true, sw: true }
   - id: "KNIGHT"
     label: "桂"
+    fullName: "桂馬"
+    description: "高みから奇襲を仕掛ける。"
     count: 2
     abilities:
       knight: true
   - id: "LANCE"
     label: "香"
+    fullName: "香車"
+    description: "猪突猛進。"
     count: 2
     abilities:
       slide: { forward: true }
   - id: "PAWN"
     label: "歩"
+    fullName: "歩"
+    description: "愚直に進む。"
     count: 9
     abilities:
       step: { n: true }

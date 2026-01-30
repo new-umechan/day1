@@ -14,7 +14,7 @@ export function renderPlay(state) {
 
     const hand1 = renderHand(state, 1);
     const hand2 = renderHand(state, 2);
-    const board = renderBoard(play);
+    const board = renderBoard(play, state.config);
 
     return `
         <div class="play-shell ${themeClass} ${dissolveClass}">
@@ -53,7 +53,8 @@ function renderHand(state, owner) {
         .filter((p) => p.id !== "KING")
         .map((p) => {
             const kind = p.id;
-            const cnt = play.hands[owner][kind];
+            const stack = play.hands[owner][kind];
+            const cnt = Array.isArray(stack) ? stack.length : 0;
             const disabled = !isTurn || cnt <= 0 ? "disabled" : "";
             const selected = selectedKind === kind ? "true" : "false";
             const label = p.label;
@@ -76,7 +77,7 @@ function renderHand(state, owner) {
     `;
 }
 
-function renderBoard(play) {
+function renderBoard(play, configByPlayer) {
     const selected = play.selection;
     const legalMap = new Map(play.legal.map((m) => [`${m.r},${m.c}`, m]));
 
@@ -88,9 +89,11 @@ function renderBoard(play) {
             const legal = legalMap.get(`${r},${c}`);
             const moveAttr = legal && !legal.capture ? "true" : "false";
             const captureAttr = legal && legal.capture ? "true" : "false";
+            const cfgOwner = piece ? (piece.configOwner || piece.owner) : null;
+            const cfg = (piece && configByPlayer && cfgOwner) ? configByPlayer[cfgOwner] : null;
             squares += `
                 <div class="square" data-action="square" data-r="${r}" data-c="${c}" data-selected="${isSelected ? "true" : "false"}" data-move="${moveAttr}" data-capture="${captureAttr}">
-                    ${piece ? `<div class="piece owner-${piece.owner}">${escapeHtml(pieceLabel(piece))}</div>` : ""}
+                    ${piece ? `<div class="piece owner-${piece.owner}">${escapeHtml(pieceLabel(piece, cfg))}</div>` : ""}
                 </div>
             `;
         }

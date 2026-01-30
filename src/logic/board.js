@@ -24,7 +24,8 @@ function stepDeltasForOwner(step, owner) {
 }
 
 export function generateMoves(board, fromR, fromC, piece, ownerConfig, includeOwnCapture = false) {
-    const abilities = mergeAbilities(ownerConfig[piece.kind], piece.promoted ? piece.extraAbilities : null);
+    const configKey = piece.instanceId || piece.kind;
+    const abilities = mergeAbilities(ownerConfig[configKey], piece.promoted ? piece.extraAbilities : null);
     const moves = [];
     const owner = piece.owner;
 
@@ -98,9 +99,17 @@ export function createEmptyBoard() {
 }
 
 export function placeInitialPieces(board) {
+    const counts = {};
     const place = (r, c, kind, owner) => {
-        board[r][c] = { kind, owner, promoted: false, extraAbilities: null };
+        if (!counts[kind]) counts[kind] = 0;
+        const instanceId = `${kind}-${counts[kind]}`;
+        counts[kind]++;
+        board[r][c] = { kind, owner, configOwner: owner, promoted: false, extraAbilities: null, instanceId };
     };
+
+    // Resetting counts per player setup would be better, but for initial setup:
+    // Actually, each player has their own set of instances.
+    // In standard shogi, player 1 and 2 pieces are identical in type and count.
 
     // Player 2 (top)
     place(0, 0, "LANCE", 2);
@@ -117,6 +126,10 @@ export function placeInitialPieces(board) {
     for (let c = 0; c < 9; c += 1) {
         place(2, c, "PAWN", 2);
     }
+
+    // Reset counts for player 1
+    // (In reality, they use the same instanceIds but in different config buckets config[1] vs config[2])
+    for (let key in counts) counts[key] = 0;
 
     // Player 1 (bottom)
     place(8, 0, "LANCE", 1);
@@ -145,18 +158,22 @@ export function canPromote(kind) {
 
 export function handInit() {
     const hand = {};
-    for (const p of PIECES_DATA) hand[p.id] = 0;
+    for (const p of PIECES_DATA) {
+        hand[p.id] = [];
+    }
     return hand;
 }
 
 export function countHand(hand) {
-    return Object.values(hand).reduce((a, b) => a + b, 0);
+    return Object.values(hand).reduce((a, v) => a + (Array.isArray(v) ? v.length : 0), 0);
 }
 
 export function standardConfigForPlayer() {
     const cfg = {};
     for (const p of PIECES_DATA) {
-        cfg[p.id] = deepClone(p.abilities);
+        for (let i = 0; i < p.count; i++) {
+            cfg[`${p.id}-${i}`] = deepClone(p.abilities);
+        }
     }
     return cfg;
 }

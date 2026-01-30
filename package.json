@@ -1,0 +1,8 @@
+{
+    "name": "day001",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "test": "node --test"
+    }
+}

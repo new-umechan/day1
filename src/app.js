@@ -4,7 +4,8 @@ import {
     parsePiecesYaml,
     createEmptyAbilities,
     abilityCost,
-    updatePiecesData
+    updatePiecesData,
+    PIECES_DATA
 } from './logic/pieces.js';
 import {
     withinBoard,
@@ -39,16 +40,29 @@ class GameApp extends HTMLElement {
     }
 
     connectedCallback() {
+        console.log("GameApp connected");
         this.shadowRoot.innerHTML = `
+            <style>
+                :host { display: block; height: 100%; }
+                #game-root { height: 100%; }
+            </style>
             <link rel="stylesheet" href="./styles.css" />
             <div id="game-root"></div>
         `;
-        this.render(); // Initial render for title screen
+        this.render();
+        console.log("Initial render called");
 
-        this.initData();
+        this.initData().then(() => console.log("Data initialized"));
 
         this.shadowRoot.addEventListener("click", (e) => this.onClick(e));
         this.shadowRoot.addEventListener("input", (e) => this.onInput(e));
+
+        window.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && this._designEditModal) {
+                this._designEditModal = null;
+                this.render();
+            }
+        });
     }
 
     async initData() {
@@ -127,17 +141,41 @@ class GameApp extends HTMLElement {
             return;
         }
 
-        if (action === "design-piece-click") {
-            const kind = el.dataset.kind;
-            if (!kind) return;
+        if (action === "reset-player-design") {
             const player = this.state.designTurn;
-            const currentConfig = this.state.config[player][kind];
+            const config = deepClone(this.state.config);
+            config[player] = standardConfigForPlayer();
+            this.setState({ config });
+            return;
+        }
+
+        if (action === "design-piece-click") {
+            const instanceId = el.dataset.instanceId;
+            if (!instanceId) return;
+            const player = this.state.designTurn;
+            const currentConfig = this.state.config[player][instanceId];
             this._designEditModal = {
-                kind,
+                instanceId,
                 player,
                 tempConfig: deepClone(currentConfig)
             };
             this.render();
+            return;
+        }
+
+        if (action === "reset-piece-ability") {
+            const modal = this._designEditModal;
+            if (!modal) return;
+            const [kind] = modal.instanceId.split('-');
+            const pData = PIECES_DATA.find(p => p.id === kind);
+            if (!pData) return;
+
+            modal.tempConfig = deepClone(pData.abilities);
+
+            // Auto-save
+            const config = deepClone(this.state.config);
+            config[modal.player][modal.instanceId] = modal.tempConfig;
+            this.setState({ config });
             return;
         }
 
@@ -156,24 +194,21 @@ class GameApp extends HTMLElement {
                 const slideKey = key.slice("slide.".length);
                 temp.slide[slideKey] = !temp.slide[slideKey];
             }
-            this.render();
-            return;
-        }
 
-        if (action === "confirm-design-edit") {
-            const modal = this._designEditModal;
-            if (!modal) return;
-            const player = modal.player;
-            const kind = modal.kind;
+            // Auto-save
             const config = deepClone(this.state.config);
-            config[player][kind] = modal.tempConfig;
-
-            this._designEditModal = null;
+            config[modal.player][modal.instanceId] = temp;
             this.setState({ config });
             return;
         }
 
         if (action === "cancel-design-edit") {
+            this._designEditModal = null;
+            this.render();
+            return;
+        }
+
+        if (action === "design-edit-close") {
             this._designEditModal = null;
             this.render();
             return;
@@ -229,7 +264,8 @@ class GameApp extends HTMLElement {
         if (!this.state.play) return;
         const play = deepClone(this.state.play);
         if (play.turn !== owner) return;
-        if (!play.hands[owner][kind]) return;
+        const stack = play.hands[owner][kind];
+        if (!Array.isArray(stack) || stack.length === 0) return;
         if (play.drop && play.drop.kind === kind) {
             play.drop = null;
         } else {
@@ -281,7 +317,8 @@ class GameApp extends HTMLElement {
         const play = deepClone(this.state.play);
         const piece = play.board[r][c];
         if (!piece) return;
-        const ownerConfig = this.state.config[piece.owner];
+        const configOwner = piece.configOwner || piece.owner;
+        const ownerConfig = this.state.config[configOwner];
         play.selection = { r, c };
         play.drop = null;
         play.legal = generateMoves(play.board, r, c, piece, ownerConfig);
@@ -292,8 +329,18 @@ class GameApp extends HTMLElement {
     executeDrop(r, c) {
         const play = deepClone(this.state.play);
         const { owner, kind } = play.drop;
-        play.hands[owner][kind] -= 1;
-        play.board[r][c] = { kind, owner, promoted: false, extraAbilities: null };
+        const stack = play.hands[owner][kind];
+        if (!Array.isArray(stack) || stack.length === 0) return;
+        const token = stack.pop();
+        if (!token) return;
+        play.board[r][c] = {
+            kind,
+            owner,
+            configOwner: token.configOwner || owner,
+            instanceId: token.instanceId || null,
+            promoted: false,
+            extraAbilities: null
+        };
         play.drop = null;
         play.selection = null;
         play.legal = [];
@@ -318,7 +365,15 @@ class GameApp extends HTMLElement {
                 this.setState({ play });
                 return;
             }
-            play.hands[moving.owner][target.kind] += 1;
+            const kind = target.kind;
+            if (!play.hands[moving.owner][kind]) play.hands[moving.owner][kind] = [];
+            play.hands[moving.owner][kind].push({
+                kind,
+                instanceId: target.instanceId || null,
+                configOwner: target.configOwner || target.owner,
+                promoted: false,
+                extraAbilities: null
+            });
         }
 
         play.board[toR][toC] = moving;
