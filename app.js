@@ -680,16 +680,9 @@ class GameApp extends HTMLElement {
 
     renderTitle() {
         return `
-            <div class="card">
-                <h1 class="title">最初</h1>
-                <div class="space"></div>
-                <div class="row">
-                    <button class="btn" data-action="start">はじめる</button>
-                </div>
-                <div class="space"></div>
-                <p class="small">
-                    ルール簡略：詰み判定なし / 二歩など未実装 / 玉・王を取ったら勝ち
-                </p>
+            <div class="title-screen">
+                <img src="./title.svg" class="title-logo" alt="設計将棋" />
+                <button class="btn-confirm" data-action="start">はじめる</button>
             </div>
         `;
     }

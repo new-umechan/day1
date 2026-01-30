@@ -422,6 +422,30 @@ input {
     margin-top: 12px;
 }
 
+/* Title Screen Specific */
+.title-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    height: 100%;
+    width: 100%;
+    min-height: 400px;
+}
+
+.title-logo {
+    width: min(508px, 90vw);
+    height: auto;
+    display: block;
+}
+
+.title-screen .btn-confirm {
+    width: 269px;
+    height: 70px;
+    font-size: 32px;
+}
+
 .design-board-wrap {
     margin: 20px 0;
     max-width: 480px;
